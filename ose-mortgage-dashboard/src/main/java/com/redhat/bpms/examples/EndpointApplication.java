@@ -1,4 +1,4 @@
-package com.redhat.refarch;
+package com.redhat.bpms.examples;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;

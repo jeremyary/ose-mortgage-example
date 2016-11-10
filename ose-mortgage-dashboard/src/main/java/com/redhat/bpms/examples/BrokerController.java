@@ -1,4 +1,4 @@
-package com.redhat.refarch;
+package com.redhat.bpms.examples;
 
 import org.kie.server.api.marshalling.MarshallingFormat;
 import org.kie.server.api.model.KieContainerResource;

@@ -18,7 +18,6 @@
     </licenses>
 
     <modules>
-        <module>ose-mortgage-datamodel</module>
         <module>ose-mortgage-rules</module>
         <module>ose-mortgage-dashboard</module>
     </modules>

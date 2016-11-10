@@ -1,5 +1,6 @@
 package com.redhat.bpms.examples;
 
+import com.redhat.bpms.examples.mortgage.Application;
 import org.kie.server.api.marshalling.MarshallingFormat;
 import org.kie.server.api.model.definition.TaskInputsDefinition;
 import org.kie.server.api.model.instance.TaskSummary;

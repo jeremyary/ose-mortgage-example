@@ -1,6 +1,3 @@
 [submodule "ose-mortgage-rules"]
 	path = ose-mortgage-rules
 	url = https://github.com/jeremyary/ose-mortgage-rules
-[submodule "ose-mortgage-dashboard/src/main/java/com/redhat/bpms/examples/ose-mortgage-datamodel"]
-	path = ose-mortgage-dashboard/src/main/java/com/redhat/bpms/examples/ose-mortgage-datamodel
-	url = https://github.com/jeremyary/ose-mortgage-datamodel

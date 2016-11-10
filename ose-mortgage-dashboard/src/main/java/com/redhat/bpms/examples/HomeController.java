@@ -1,12 +1,15 @@
 package com.redhat.bpms.examples;
 
-import org.kie.server.api.marshalling.MarshallingFormat;
 import org.kie.server.api.model.KieContainerResource;
 import org.kie.server.api.model.definition.ProcessDefinition;
 import org.kie.server.api.model.instance.ProcessInstance;
 import org.kie.server.api.model.instance.TaskSummary;
 import org.kie.server.api.model.instance.WorkItemInstance;
-import org.kie.server.client.*;
+import org.kie.server.client.ProcessServicesClient;
+import org.kie.server.client.QueryServicesClient;
+import org.kie.server.client.UserTaskServicesClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.GET;
@@ -22,14 +25,9 @@ import java.util.List;
  */
 @Path("/home")
 @RequestScoped
-public class HomeController {
+public class HomeController extends BaseController {
 
-    private static final String URL = "http://mort-dashboard.bxms.ose/kie-server/services/rest/server";
-    private static final String USER = "kieserver";
-    private static final String PASSWORD = "kieserver1!";
-    // TODO: EXTERNALIZE
-
-    private static final MarshallingFormat FORMAT = MarshallingFormat.JSON;
+    static final Logger logger = LoggerFactory.getLogger(HomeController.class);
 
     @GET
     @Path("/containers")
@@ -38,11 +36,11 @@ public class HomeController {
 
         List<KieContainerResource> containers = new LinkedList<>();
         try {
-            KieServicesClient client = initClient();
-            containers = client.listContainers().getResult().getContainers();
+            containers = initClient(Configuration.Users.KIESERVER)
+                    .listContainers().getResult().getContainers();
 
         } catch (Exception e) {
-            throw e;
+            logger.error("ERROR in Rest endpoint listContainers...", e);
         }
         return containers;
     }
@@ -52,21 +50,18 @@ public class HomeController {
     @Produces(MediaType.APPLICATION_JSON)
     public List<ProcessDefinition> listProcesses() {
 
-        List<KieContainerResource> containers = new LinkedList<>();
         List<ProcessDefinition> processDefinitions = new LinkedList<>();
 
         try {
-            KieServicesClient client = initClient();
-            containers = client.listContainers().getResult().getContainers();
+            QueryServicesClient queryClient = initClient(Configuration.Users.KIESERVER)
+                    .getServicesClient(QueryServicesClient.class);
 
-            QueryServicesClient queryClient = client.getServicesClient(QueryServicesClient.class);
-
-            for (KieContainerResource container : containers) {
+            for (KieContainerResource container : listContainers()) {
                 processDefinitions.addAll(queryClient.findProcessesByContainerId(container.getContainerId(), 0, 100));
             }
 
         } catch (Exception e) {
-            throw e;
+            logger.error("ERROR in Rest endpoint listProcesses...", e);
         }
 
         return processDefinitions;
@@ -75,24 +70,21 @@ public class HomeController {
     @GET
     @Path("/running")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<ProcessInstance> listRunningProcesses() {
+    public List<ProcessInstance> listProcessInstances() {
 
-        List<KieContainerResource> containers = new LinkedList<>();
         List<ProcessInstance> processInstances = new LinkedList<>();
 
         try {
-            KieServicesClient client = initClient();
-            containers = client.listContainers().getResult().getContainers();
+            QueryServicesClient queryClient = initClient(Configuration.Users.KIESERVER)
+                    .getServicesClient(QueryServicesClient.class);
 
-            QueryServicesClient queryClient = client.getServicesClient(QueryServicesClient.class);
-
-            for (KieContainerResource container : containers) {
+            for (KieContainerResource container : listContainers()) {
                 processInstances.addAll(queryClient.findProcessInstancesByContainerId(container.getContainerId(),
                         new LinkedList<>(), 0, 100));
             }
 
         } catch (Exception e) {
-            throw e;
+            logger.error("ERROR in Rest endpoint listProcessInstances...", e);
         }
 
         return processInstances;
@@ -103,31 +95,20 @@ public class HomeController {
     @Produces(MediaType.APPLICATION_JSON)
     public List<TaskSummary> listTasks() {
 
-        List<KieContainerResource> containers = new LinkedList<>();
-        List<ProcessInstance> processInstances = new LinkedList<>();
         List<TaskSummary> tasks = new LinkedList<>();
 
         try {
-            KieServicesClient client = initClient();
-            containers = client.listContainers().getResult().getContainers();
+            UserTaskServicesClient userTaskClient = initClient(Configuration.Users.KIESERVER)
+                    .getServicesClient(UserTaskServicesClient.class);
 
-            QueryServicesClient queryClient = client.getServicesClient(QueryServicesClient.class);
-
-            for (KieContainerResource container : containers) {
-                processInstances.addAll(queryClient.findProcessInstancesByContainerId(container.getContainerId(),
-                        new LinkedList<>(), 0, 100));
-            }
-
-            UserTaskServicesClient userTaskClient = client.getServicesClient(UserTaskServicesClient.class);
-
-            for (ProcessInstance process : processInstances) {
+            for (ProcessInstance process : listProcessInstances()) {
 
                 tasks.addAll((userTaskClient.findTasksByStatusByProcessInstanceId(process.getId(), new LinkedList<>()
                         , 0, 100)));
             }
 
         } catch (Exception e) {
-            throw e;
+            logger.error("ERROR in Rest endpoint listTasks...", e);
         }
 
         return tasks;
@@ -138,40 +119,22 @@ public class HomeController {
     @Produces(MediaType.APPLICATION_JSON)
     public List<WorkItemInstance> listWorkItems() {
 
-        List<KieContainerResource> containers = new LinkedList<>();
-        List<ProcessInstance> processInstances = new LinkedList<>();
         List<WorkItemInstance> tasks = new LinkedList<>();
 
         try {
-            KieServicesClient client = initClient();
-            containers = client.listContainers().getResult().getContainers();
+            ProcessServicesClient processServicesClient = initClient(Configuration.Users.KIESERVER)
+                    .getServicesClient(ProcessServicesClient.class);
 
-            QueryServicesClient queryClient = client.getServicesClient(QueryServicesClient.class);
-
-            for (KieContainerResource container : containers) {
-                processInstances.addAll(queryClient.findProcessInstancesByContainerId(container.getContainerId(),
-                        new LinkedList<>(), 0, 100));
-            }
-
-            ProcessServicesClient processServicesClient = client.getServicesClient(ProcessServicesClient.class);
-
-            for (ProcessInstance process : processInstances) {
+            for (ProcessInstance process : listProcessInstances()) {
 
                 tasks.addAll(processServicesClient.getWorkItemByProcessInstance(process.getContainerId(), process.getId
                         ()));
             }
 
         } catch (Exception e) {
-            throw e;
+            logger.error("ERROR in Rest endpoint listWorkItems...", e);
         }
 
         return tasks;
-    }
-
-    private KieServicesClient initClient() {
-
-        KieServicesConfiguration conf = KieServicesFactory.newRestConfiguration(URL, USER, PASSWORD);
-        conf.setMarshallingFormat(FORMAT);
-        return KieServicesFactory.newKieServicesClient(conf);
     }
 }

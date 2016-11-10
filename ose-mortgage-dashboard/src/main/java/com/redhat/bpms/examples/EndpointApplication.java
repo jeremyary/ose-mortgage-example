@@ -1,7 +1,9 @@
 package com.redhat.bpms.examples;
 
 import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.Application;
+import java.util.Properties;
 import java.util.Set;
 
 /***
@@ -23,5 +25,4 @@ public class EndpointApplication extends Application {
         resources.add(BrokerController.class);
         resources.add(ApplicantController.class);
     }
-
 }

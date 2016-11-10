@@ -1,0 +1,23 @@
+
+<div class="row">
+    <h4><b>Broker Tasks</b></h4>
+    <table class="table table-striped table-bordered">
+        <thead>
+        <tr>
+            <th>Container Id</th>
+            <th>Status</th>
+            <th>Rules Package</th>
+            <th>Scanner Status</th>
+        </tr>
+        </thead>
+
+        <tbody ng-repeat="task in tasks">
+        <tr>
+            <td>{{container["container-id"]}}</td>
+            <td>{{container.status}}</td>
+            <td>{{container["release-id"]["group-id"]}}.{{container["release-id"]["artifact-id"]}}:{{container["release-id"]["version"]}}</td>
+            <td>{{container.scanner.status}}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
